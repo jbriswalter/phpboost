@@ -148,12 +148,20 @@ class BBCodeParser extends ContentFormattingParser
 	{
 		$array_preg = array(
 			'b' => '`\[b\](.+)\[/b\]`isuU',
+			'strong' => '`\[strong\](.+)\[/strong\]`isuU',
 			'i' => '`\[i\](.+)\[/i\]`isuU',
+			'em' => '`\[em\](.+)\[/em\]`isuU',
 			'u' => '`\[u\](.+)\[/u\]`isuU',
 			's' => '`\[s\](.+)\[/s\]`isuU',
+			'del' => '`\[del\](.+)\[/del\]`isuU',
 			'p' => '`\[p\](.+)\[/p\]`isuU',
+			'q' => '`\[q\](.+)\[/q\]`isuU',
+			'c' => '`\[c\](.+)\[/c\]`isuU',
 			'sup' => '`\[sup\](.+)\[/sup\]`isuU',
 			'sub' => '`\[sub\](.+)\[/sub\]`isuU',
+			'ins' => '`\[ins\](.+)\[/ins\]`isuU',
+			'cite' => '`\[cite\](.+)\[/cite\]`isuU',
+			'mark' => '`\[mark\](.+)\[/mark\]`isuU',
 			'color' => '`\[color=((?:white|black|red|green|blue|yellow|purple|orange|maroon|pink)|(?:#[0-9a-f]{6}))\](.+)\[/color\]`isuU',
 			'bgcolor' => '`\[bgcolor=((?:white|black|red|green|blue|yellow|purple|orange|maroon|pink)|(?:#[0-9a-f]{6}))\](.+)\[/bgcolor\]`isuU',
 			'size' => '`\[size=([1-9]|(?:[1-4][0-9]))\](.+)\[/size\]`isuU',
@@ -194,32 +202,40 @@ class BBCodeParser extends ContentFormattingParser
 		);
 
 		$array_preg_replace = array(
-			'b' => "<strong>$1</strong>",
-			'i' => "<em>$1</em>",
-			'u' => "<span style=\"text-decoration: underline;\">$1</span>",
-			's' => "<s>$1</s>",
-			'p' => "<p>$1</p>",
+			'b' => '<b>$1</b>',
+			'strong' => '<strong>$1</strong>',
+			'i' => '<i>$1</i>',
+			'em' => '<em>$1</em>',
+			'u' => '<span style="text-decoration:underline;">$1</span>', // 'u' => '<u>$1</u>',
+			's' => '<s>$1</s>',
+			'del' => '<del>$1</del>',
+			'p' => '<p>$1</p>',
+			'q' => '<q>$1</q>',
+			'c' => '<code style="display:inline-block;">$1</code>',
 			'sup' => '<sup>$1</sup>',
 			'sub' => '<sub>$1</sub>',
-			'color' => "<span style=\"color:$1;\">$2</span>",
-			'bgcolor' => "<span style=\"background-color:$1;\">$2</span>",
-			'size' => "<span style=\"font-size: $1px;\">$2</span>",
-			'font' => "<span style=\"font-family: $1;\">$2</span>",
-			'pre' => "<pre>$1</pre>",
-			'align' => "<p style=\"text-align: $1;\">$2</p>",
-			'float' => "<p class=\"float-$1\">$2</p>",
-			'anchor' => "<span id=\"$1\">$2</span>",
-			'acronym' => "<acronym class=\"formatter-acronym\">$1</acronym>",
-			'acronym2' => "<acronym title=\"$1\" class=\"formatter-acronym\">$2</acronym>",
-			'abbr' => "<abbr class=\"formatter-abbr\">$1</abbr>",
-			'abbr2' => "<abbr title=\"$1\" class=\"formatter-abbr\">$2</abbr>",
-			'style' => "<span class=\"message-helper bgc $1\">$2</span>",
+			'ins' => '<ins>$1</ins>',
+			'cite' => '<cite>$1</cite>',
+			'mark' => '<mark>$1</mark>',		
+			'color' => '<span style="color:$1;">$2</span>',
+			'bgcolor' => '<span style="background-color:$1;">$2</span>',
+			'size' => '<span style="font-size: $1px;">$2</span>',
+			'font' => '<span style="font-family: $1;">$2</span>',
+			'pre' => '<pre>$1</pre>',
+			'align' => '<p style="text-align: $1;">$2</p>',
+			'float' => '<p class="float-$1">$2</p>',
+			'anchor' => '<span id="$1">$2</span>',
+			'acronym' => '<acronym class="formatter-acronym">$1</acronym>',
+			'acronym2' => '<acronym title="$1\" class="formatter-acronym">$2</acronym>',
+			'abbr' => '<abbr class="formatter-abbr">$1</abbr>',
+			'abbr2' => '<abbr title="$1\" class="formatter-abbr">$2</abbr>',
+			'style' => '<span class="message-helper bgc $1">$2</span>',
 			'movie' => '[[MEDIA]]insertMoviePlayer(\'$3\', $1, $2);[[/MEDIA]]',
 			'movie2' => '[[MEDIA]]insertMoviePlayer(\'$4\', $1, $2, \'$3\');[[/MEDIA]]',
 			'sound' => '[[MEDIA]]insertSoundPlayer(\'$1\');[[/MEDIA]]',
 			'math' => '[[MATH]]$1[[/MATH]]',
-			'mail' => "<a href=\"mailto:$1\">$1</a>",
-			'mail2' => "<a href=\"mailto:$1\">$2</a>",
+			'mail' => '<a href="mailto:$1">$1</a>',
+			'mail2' => '<a href="mailto:$1">$2</a>',
 			'url1' => '<a class="offload" href="$1">$1</a>',
 			'url2' => '<a class="offload" href="$1">$6</a>',
 			'url3' => '<a class="offload" href="$1">$1</a>',
@@ -287,6 +303,12 @@ class BBCodeParser extends ContentFormattingParser
 		if (!in_array('title', $this->forbidden_tags))
 		{
 			$this->content = preg_replace_callback('`\[title=([1-6])\](.+)\[/title\]`iuU', array($this, 'parse_title'), $this->content);
+		}
+
+		//Title tag
+		if (!in_array(['h1','h2','h3','h4','h5','h6'], $this->forbidden_tags))
+		{
+			$this->content = preg_replace_callback('`\[h([1-6])\](.+)\[/h([1-6])\]`iuU', array($this, 'parse_title'), $this->content);
 		}
 
 		//Image tag
